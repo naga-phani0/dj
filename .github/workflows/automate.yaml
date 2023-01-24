@@ -1,0 +1,54 @@
+name: Code Conditions Check
+
+on: push
+
+jobs:
+
+  check-code:
+
+    name: Python file conditions check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Set python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Get changed python files
+        id: get-changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: "*.py"
+
+      - name: Install pytlint
+        run: pip install pylint
+
+      - name: Run condition.py on them
+        run: |
+          for file in ${{ steps.get-changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+            if python conditions.py $file | grep -q "All check pass"
+            then
+              echo "$file true"
+              echo "COMMIT=1" >> $GITHUB_ENV
+            else
+              echo "$file false"
+              echo "COMMIT=0" >> $GITHUB_ENV
+            fi
+          done
+
+      - name: Push to production repo
+        if: ${{ env.COMMIT == 1 }}
+        uses: manzoorwanijk/action-deploy-to-repo@master
+        with:
+          src_dir: /
+          target_owner: djharshit
+          target_repo: to
+          target_branch: main # default
+          access_token: ${{ secrets.ACCESS_TOKEN }}
+          # Optional
+          # cleanup_command: "rm -rf assets/* && rm -f assets/asset-manifest.json"
