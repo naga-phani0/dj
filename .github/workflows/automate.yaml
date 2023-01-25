@@ -46,7 +46,7 @@ jobs:
           src_dir: /
           target_owner: naga-phani0
           target_repo: to
-          target_branch: main # default
+          target_branch: master # default
           access_token: ${{ secrets.ACCESS_TOKEN }}
           # Optional
           # cleanup_command: "rm -rf assets/* && rm -f assets/asset-manifest.json"
